@@ -188,6 +188,7 @@ Cache::accessSingleLine(IntPtr addr, access_t access_type,
 {
    //assert((buff == NULL) == (bytes == 0));
 
+   std::cout << std::hex << addr << ", " << NAME << '\n';
    IntPtr tag;
    UInt32 set_index;
    UInt32 line_index = -1;
