@@ -119,6 +119,11 @@ Cache::Cache(
 
    }
 
+   for(int i=0; i< 9; i++)
+   {
+      registerStatsMetric(name, core_id, String("X_tlb_block_util-")+std::to_string(i).c_str(), &tlb_block_util[i]);
+   }
+
    registerStatsMetric(name, core_id, String("average_data_reuse"), &average_data_reuse);
    registerStatsMetric(name, core_id, String("average_metadata_reuse"), &average_metadata_reuse);
    registerStatsMetric(name, core_id, String("average_tlb_reuse"), &average_tlb_reuse);
@@ -283,7 +288,7 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 
    if((*eviction) == true){
 
-
+      tlb_block_util[m_sets[set_index]->tlb_entry_utilization]++;
 
       int reuse_value = evict_block_info->getReuse();
       

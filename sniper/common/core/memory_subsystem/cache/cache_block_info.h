@@ -110,6 +110,14 @@ class CacheBlockInfo
 
       void increaseReuse(){m_reuse++;}
       int getReuse(){return m_reuse;}
+
+      int getUsage_count() {
+         uint8_t temp = m_used;
+         int count = 0;
+         for(int i=0; i< 8; i++)
+            count += temp >> i & 1;
+         return count;
+      }
       
 };
 
