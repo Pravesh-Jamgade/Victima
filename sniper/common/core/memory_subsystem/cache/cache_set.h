@@ -73,6 +73,10 @@ class CacheSet
       uint64_t countUtopiaCacheBlocks();
       uint64_t countTLBCacheBlocks();
 
+
+      // var
+      uint64_t tlb_entry_utilization = 0;
+
 };
 
 #endif /* CACHE_SET_H */

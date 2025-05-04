@@ -121,6 +121,10 @@ CacheSet::insert(CacheBlockInfo* cache_block_info, Byte* fill_buff, bool* evicti
    if (m_cache_block_info_array[index]->isValid())
    {
 
+      if(m_cache_block_info_array[index]->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY)
+      {
+         tlb_entry_utilization += 1 << m_cache_block_info_array[index]->getUsage_count();
+      }
       // if(getAssociativity() == 16 && cntlr) 
       //    std::cout << "L2 evict before insert" << std::endl;
       *eviction = true;
