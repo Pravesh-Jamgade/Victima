@@ -72,6 +72,8 @@ class Cache : public CacheBase
       UInt64 metadata_util[8];
       UInt64 tlb_util[8];
 
+      UInt64 tlb_block_util[9] ={0};
+
       #ifdef ENABLE_SET_USAGE_HIST
       UInt64* m_set_usage_hist;
       #endif
