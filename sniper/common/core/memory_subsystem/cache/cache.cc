@@ -289,7 +289,8 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
    if((*eviction) == true){
 
       tlb_block_util[m_sets[set_index]->tlb_entry_utilization]++;
-
+      m_sets[set_index]->tlb_entry_utilization = 0;
+      
       int reuse_value = evict_block_info->getReuse();
       
       if(cache_block_info->getBlockType()==CacheBlockInfo::block_type_t::NON_PAGE_TABLE){
