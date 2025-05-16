@@ -32,7 +32,6 @@ CacheBlockInfo::CacheBlockInfo(IntPtr tag, CacheState::cstate_t cstate, UInt64 o
    m_reuse(0),
    m_block_type(NON_PAGE_TABLE)
 {
-
 }
 
 CacheBlockInfo::~CacheBlockInfo()
@@ -76,6 +75,7 @@ CacheBlockInfo::clone(CacheBlockInfo* cache_block_info)
    m_block_type = cache_block_info->getBlockType();
    m_reuse = cache_block_info->getReuse();
    m_page_size = cache_block_info->getPageSize();
+   unique_block_offset = cache_block_info->unique_block_offset;
    // m_sub_tag_array_tlb = cache_block_info->getTagArrayTLB();
    // m_valid_tlb = cache_block_info->getValidArrayTLB();
 }
@@ -98,4 +98,13 @@ CacheBlockInfo::updateUsage(BitsUsedType used)
    bool new_bits_set = used & ~m_used; // Are we setting any bits that were previously unset?
    m_used |= used;                     // Update usage mask
    return new_bits_set;
+}
+
+int CacheBlockInfo::func_updateUsage(UInt32 off) {
+   unique_block_offset.insert(off);
+   return 0;
+} 
+
+int CacheBlockInfo::func_getOffsetUsage(){
+   return unique_block_offset.size();
 }

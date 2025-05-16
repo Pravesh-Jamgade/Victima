@@ -4,6 +4,7 @@
 #include "fixed_types.h"
 #include "cache_state.h"
 #include "cache_base.h"
+#include <set>
 
 class CacheBlockInfo
 {
@@ -52,6 +53,10 @@ class CacheBlockInfo
       int utilization;
 
       static const char* option_names[];
+
+      // var
+      std::set<uint32_t> unique_block_offset;
+      int tlb_entry_utilization = 0;
 
    public:
       CacheBlockInfo(IntPtr tag = ~0,
@@ -110,14 +115,8 @@ class CacheBlockInfo
 
       void increaseReuse(){m_reuse++;}
       int getReuse(){return m_reuse;}
-
-      int getUsage_count() {
-         uint8_t temp = m_used;
-         int count = 0;
-         for(int i=0; i< 8; i++)
-            count += temp >> i & 1;
-         return count;
-      }
+      int func_updateUsage(UInt32 off);
+      int func_getOffsetUsage();
       
 };
 

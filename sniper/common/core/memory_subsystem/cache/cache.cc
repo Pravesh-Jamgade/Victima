@@ -3,6 +3,7 @@
 #include "log.h"
 #include "stats.h"
 #include "config.hpp"
+#include <bits/stdc++.h>
 
 // Cache class
 // constructors/destructors
@@ -58,6 +59,14 @@ Cache::Cache(
    metadata_passthrough_loc(Sim()->getCfg()->getInt("perf_model/metadata/passthrough_loc")),
    potm_enabled(Sim()->getCfg()->getBool("perf_model/tlb/potm_enabled"))
 {
+   core_id_str = String(std::to_string(core_id).c_str());
+
+   history_hit = std::vector<int>(num_sets, 0);
+
+   history_blocks = std::vector<std::vector<CacheBlockInfo*>>(num_sets);
+   // for(uint32_t i=0; i< num_sets; i++)
+   //    history_blocks[i] = std::vector<CacheBlockInfo*>(4*associativity);
+   
    reuse_levels[0]=5;
    reuse_levels[1]=10;
    reuse_levels[2]=20;
@@ -116,13 +125,30 @@ Cache::Cache(
    for (int i=0; i < 8; i++){
          
          registerStatsMetric(name, core_id, String("tlb-util-")+std::to_string(i).c_str(), &tlb_util[i]);
-
    }
 
+   // record tlb block utilization in L2 cache
    for(int i=0; i< 9; i++)
    {
-      registerStatsMetric(name, core_id, String("X_tlb_block_util-")+std::to_string(i).c_str(), &tlb_block_util[i]);
+      registerStatsMetric(name, core_id, String("log_tlb_block_util-")+std::to_string(i).c_str(), &tlb_block_util[i]);
    }
+
+   // record count of tlb evicted pte 
+   registerStatsMetric(name, core_id, String("log_tlb_eviction_count"), &tlb_block_evicted);
+
+   // // record stlb hits on each set
+   // for(uint32_t i=0; i< num_sets; i++)
+   // {
+   //    registerStatsMetric(name, core_id, String("log_history_hits_on_set-")+std::to_string(i).c_str(), &history_hit[i], true);
+   // }
+
+   // // record histogram of distance of history hit in in queue (history maintained per set and histo is generated for all of sets together)
+   // for(auto entry: history_distance)
+   // {
+   //    registerStatsMetric(name, core_id, String("log_history_dist_histo"), &entry, true);
+   // }
+
+   
 
    registerStatsMetric(name, core_id, String("average_data_reuse"), &average_data_reuse);
    registerStatsMetric(name, core_id, String("average_metadata_reuse"), &average_metadata_reuse);
@@ -133,6 +159,35 @@ Cache::Cache(
 Cache::~Cache()
 {
 
+   if(m_name.find("stlb") != String::npos || m_name.find("L2") != String::npos)
+   {
+      {
+         String suff =  "/" + m_name + String("_history_hit_") + core_id_str;
+         String file_name = Sim()->getConfig()->getOutputDirectory()+ suff;
+         std::ofstream fout;
+         fout.open(file_name.c_str());
+
+         fout << "set_index, history_hits\n";
+         for(int i=0; i< history_hit.size(); i++)
+         {
+            fout << i << ", " << history_hit[i] << '\n';
+         }
+      }
+
+      {
+         String suff = "/" + m_name + String("_history_reuse_distance_")+ core_id_str;
+         String file_name = Sim()->getConfig()->getOutputDirectory()+ suff;
+         std::ofstream fout;
+         fout.open(file_name.c_str());
+
+         fout << "reuse_distance, frequency\n";
+         for(auto entry: history_distance)
+         {
+            fout << entry.first << ", " << entry.second << '\n';
+         }
+      }
+   }
+   
    #ifdef ENABLE_SET_USAGE_HIST
    printf("Cache %s set usage:", m_name.c_str());
    for (SInt32 i = 0; i < (SInt32) m_num_sets; i++)
@@ -220,6 +275,17 @@ Cache::accessSingleLine(IntPtr addr, access_t access_type,
    if(tlb_entry && !(cache_block_info->isTLBBlock())) 
       return NULL;
    
+   {
+      for(auto block : history_blocks[set_index])
+      {
+         if(block->getTag() == tag)
+         {
+            history_hit[set_index]++;
+            int distance = std::distance(history_blocks[set_index].begin(), history_blocks[set_index].end());
+            history_distance[distance]++; 
+         }
+      }
+   }
 
    if (access_type == LOAD)
    {
@@ -231,6 +297,11 @@ Cache::accessSingleLine(IntPtr addr, access_t access_type,
    }
    else
    {
+      // if(m_name == "L2" && cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY || cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH)
+      // {
+      //    std::cout << "L2 Log: address," << std::hex << addr << ", tag," << tag << ", set," << set_index << ", off," << block_offset << '\n';   
+      // }
+      cache_block_info->func_updateUsage(block_offset);
       set->write_line(line_index, block_offset, buff, bytes, update_replacement);
 
       // NOTE: assumes error occurs in memory. If we want to model bus errors, insert the error into buff instead
@@ -252,10 +323,11 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
    UInt32 set_index;
    splitAddress(addr, tag, set_index);
 
-
+   UInt32 block_offset = addr & ((1<<m_log_blocksize) - 1);
    CacheBlockInfo* cache_block_info = CacheBlockInfo::create(m_cache_type);
    cache_block_info->setTag(tag);
    cache_block_info->setBlockType(btype);
+   cache_block_info->func_updateUsage(block_offset);
 
    bool metadata_request = (btype == CacheBlockInfo::block_type_t::PAGE_TABLE) || 
                            (btype == CacheBlockInfo::block_type_t::PAGE_TABLE_PASSTHROUGH) || 
@@ -266,16 +338,13 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 
 
    if(m_name == "L2" && metadata_request && metadata_passthrough_loc > 2){
-
       //std::cout << "[L2] Inserting in fake set of L2: " << addr <<std::endl;
       m_fake_sets[0]->insert(cache_block_info, fill_buff,
          eviction, evict_block_info, evict_buff, cntlr);
-
    }
    else{
       m_sets[set_index]->insert(cache_block_info, fill_buff,
          eviction, evict_block_info, evict_buff, cntlr); 
-
    }
 
 
@@ -288,9 +357,31 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 
    if((*eviction) == true){
 
-      tlb_block_util[m_sets[set_index]->tlb_entry_utilization]++;
-      m_sets[set_index]->tlb_entry_utilization = 0;
+      uint32_t total_blocks = m_num_sets * m_associativity;
+      // remove begining element
+      if(history_blocks[set_index].size() == total_blocks)
+         history_blocks[set_index].erase(history_blocks[set_index].begin());
       
+      // push element to back
+      history_blocks[set_index].push_back(evict_block_info);
+
+      if(m_name == "L2")
+      {
+         if(evict_block_info != nullptr &&
+            evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY || 
+            evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY_PASSTHROUGH)
+         {
+
+            // if(m_name == "L2" && cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY || cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH)
+      // {
+      //    std::cout << "L2 Log: address," << std::hex << addr <<", tag," << tag << ", set," << set_index << ", off," << block_offset << '\n'; 
+      //    std::cout << "Evict Log: off_count, " << std::dec << evict_block_info->func_getOffsetUsage() << ", bit_count, " <<  bits_set(evict_block_info->getUsage()) << '\n'; 
+      // }
+            tlb_block_util[bits_set(evict_block_info->getUsage())]++;
+            tlb_block_evicted++;
+         }
+      }
+
       int reuse_value = evict_block_info->getReuse();
       
       if(cache_block_info->getBlockType()==CacheBlockInfo::block_type_t::NON_PAGE_TABLE){
@@ -326,7 +417,6 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
       }
       else if( cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY ||  cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH)
       {
-
          if(reuse_value == 0) tlb_reuse[0]++;
          else if(reuse_value <= reuse_levels[0] ) tlb_reuse[1]++;
          else if(reuse_value <= reuse_levels[1])  tlb_reuse[2]++;
@@ -590,12 +680,10 @@ Cache::measureStats()
 }
 void Cache::markMetadata(IntPtr address, CacheBlockInfo::block_type_t blocktype){
 
-   
    IntPtr tag;
    UInt32 set_index;
-
+   
    splitAddress(address, tag, set_index);
-
 
    for (int i=0; i < getCacheSet(set_index)->getAssociativity(); i++){
             

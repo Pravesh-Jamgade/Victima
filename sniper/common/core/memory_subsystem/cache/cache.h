@@ -12,6 +12,7 @@
 #include "core.h"
 #include "fault_injection.h"
 #include "stats.h"
+#include <vector>
 
 // Define to enable the set usage histogram
 //#define ENABLE_SET_USAGE_HIST
@@ -73,6 +74,13 @@ class Cache : public CacheBase
       UInt64 tlb_util[8];
 
       UInt64 tlb_block_util[9] ={0};
+      UInt64 tlb_block_evicted =0;
+
+      // per set eviction history
+      std::vector<std::vector<CacheBlockInfo*>> history_blocks; 
+      std::vector<int> history_hit; 
+      std::map<int, int> history_distance; 
+      String core_id_str = "";
 
       #ifdef ENABLE_SET_USAGE_HIST
       UInt64* m_set_usage_hist;
