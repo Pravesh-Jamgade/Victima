@@ -364,22 +364,13 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
       
       // push element to back
       history_blocks[set_index].push_back(evict_block_info);
-
-      if(m_name == "L2")
+      
+      if(evict_block_info != nullptr &&
+         evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY || 
+         evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY_PASSTHROUGH)
       {
-         if(evict_block_info != nullptr &&
-            evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY || 
-            evict_block_info->getBlockType()==CacheBlockInfo::TLB_ENTRY_PASSTHROUGH)
-         {
-
-            // if(m_name == "L2" && cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY || cache_block_info->getBlockType() == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH)
-      // {
-      //    std::cout << "L2 Log: address," << std::hex << addr <<", tag," << tag << ", set," << set_index << ", off," << block_offset << '\n'; 
-      //    std::cout << "Evict Log: off_count, " << std::dec << evict_block_info->func_getOffsetUsage() << ", bit_count, " <<  bits_set(evict_block_info->getUsage()) << '\n'; 
-      // }
-            tlb_block_util[bits_set(evict_block_info->getUsage())]++;
-            tlb_block_evicted++;
-         }
+         tlb_block_util[evict_block_info->func_getOffsetUsage()]++;
+         tlb_block_evicted++;
       }
 
       int reuse_value = evict_block_info->getReuse();

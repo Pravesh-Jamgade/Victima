@@ -73,7 +73,7 @@ class Cache : public CacheBase
       UInt64 metadata_util[8];
       UInt64 tlb_util[8];
 
-      UInt64 tlb_block_util[9] ={0};
+      UInt64 tlb_block_util[9];
       UInt64 tlb_block_evicted =0;
 
       // per set eviction history
