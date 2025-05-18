@@ -83,9 +83,9 @@ class CacheBase
       virtual ~CacheBase();
 
       // utilities
-      void splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index) const;
+      void splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index, bool fromTLB=false) const;
       void splitAddressTLB(const IntPtr addr, IntPtr& tag, UInt32& set_index, int page_size) const;
-      void splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index, UInt32& block_offset) const;
+      void splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index, UInt32& block_offset, bool fromTLB=false) const;
       void splitAddressTLB(const IntPtr addr, IntPtr& tag, UInt32& set_index, UInt32& block_offset, int page_size) const;
       IntPtr tagToAddress(const IntPtr tag);
       IntPtr tagToAddressTLB(const IntPtr tag, int page_size);

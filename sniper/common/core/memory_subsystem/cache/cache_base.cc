@@ -3,6 +3,7 @@
 #include "log.h"
 #include "rng.h"
 #include "address_home_lookup.h"
+#include "simulator.h"
 
 CacheBase::CacheBase(
    String name, UInt32 num_sets, UInt32 associativity, UInt32 cache_block_size,
@@ -49,12 +50,21 @@ CacheBase::parseAddressHash(String hash_name)
 }
 
 void
-CacheBase::splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index) const
+CacheBase::splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index, bool fromTLB) const
 {
    tag = addr >> m_log_blocksize;
 
    IntPtr linearAddress = m_ahl ? m_ahl->getLinearAddress(addr) : addr;
    IntPtr block_num = linearAddress >> m_log_blocksize;
+
+   int shift_amt = Sim()->getExtraConfig()->shift_amt;
+   if(m_name.find("L2") != std::string::npos && shift_amt)
+   {
+      block_num = block_num >> shift_amt;
+      set_index = block_num & (m_num_sets-1);
+      return;
+   }
+
 
    switch(m_hash)
    {
@@ -173,10 +183,10 @@ CacheBase::splitAddressTLB(const IntPtr addr, IntPtr& tag, UInt32& set_index, in
 
 void
 CacheBase::splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index,
-                  UInt32& block_offset) const
+                  UInt32& block_offset, bool fromTLB) const
 {
    block_offset = addr & (m_blocksize-1);
-   splitAddress(addr, tag, set_index);
+   splitAddress(addr, tag, set_index, fromTLB);
 }
 
 void

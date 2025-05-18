@@ -82,6 +82,8 @@ class Cache : public CacheBase
       std::map<int, int> history_distance; 
       String core_id_str = "";
 
+      std::map<int, int> temp_off_freq;
+
       #ifdef ENABLE_SET_USAGE_HIST
       UInt64* m_set_usage_hist;
       #endif

@@ -186,6 +186,17 @@ Cache::~Cache()
             fout << entry.first << ", " << entry.second << '\n';
          }
       }
+      {
+         String suff = "/" + m_name + String("_offset_freq_")+ core_id_str;
+         String file_name = Sim()->getConfig()->getOutputDirectory()+ suff;
+         std::ofstream fout;
+         fout << "offset, frequency\n";
+         fout.open(file_name.c_str());
+         for(auto entry: temp_off_freq)
+         {
+            fout << entry.first << ", " << entry.second << '\n';
+         }
+      }
    }
    
    #ifdef ENABLE_SET_USAGE_HIST
@@ -321,7 +332,7 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 {
    IntPtr tag;
    UInt32 set_index;
-   splitAddress(addr, tag, set_index);
+   splitAddress(addr, tag, set_index, btype==CacheBlockInfo::TLB_ENTRY || btype==CacheBlockInfo::TLB_ENTRY_PASSTHROUGH);
 
    UInt32 block_offset = addr & ((1<<m_log_blocksize) - 1);
    CacheBlockInfo* cache_block_info = CacheBlockInfo::create(m_cache_type);
@@ -371,6 +382,7 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
       {
          tlb_block_util[evict_block_info->func_getOffsetUsage()]++;
          tlb_block_evicted++;
+         temp_off_freq[evict_block_info->getUsage()]++;
       }
 
       int reuse_value = evict_block_info->getReuse();
