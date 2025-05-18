@@ -19,6 +19,7 @@
 #include "shmem_perf.h"
 #include "boost/tuple/tuple.hpp"
 #include "utopia_cache_template.h"
+#include "request.h"
 class DramCntlrInterface;
 class ATD;
 

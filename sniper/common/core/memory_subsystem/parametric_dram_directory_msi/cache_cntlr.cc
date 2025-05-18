@@ -11,6 +11,7 @@
 #include "shmem_perf.h"
 #include "utopia_cache_template.h"
 #include <cstring>
+#include "request.h"
 
 // Define to allow private L2 caches not to take the stack lock.
 // Works in most cases, but seems to have some more bugs or race conditions, preventing it from being ready for prime time.
@@ -365,7 +366,6 @@ CacheCntlr::processMemOpFromCore(
       bool count,CacheBlockInfo::block_type_t block_type,SubsecondTime TLB_latency, UtopiaCache *shadow_cache,
       Core::mem_origin_t mem_origin)
 {
-
    HitWhere::where_t hit_where = HitWhere::MISS;
 
    bool metadata_request= (block_type==CacheBlockInfo::block_type_t::PAGE_TABLE) 
@@ -374,6 +374,11 @@ CacheCntlr::processMemOpFromCore(
                            || (block_type==CacheBlockInfo::block_type_t::EXPRESSIVE) 
                            || (block_type==CacheBlockInfo::block_type_t::TLB_ENTRY) 
                            || (block_type==CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH);
+
+   Request* request = new Request();
+   request->block_type = block_type;
+   request->count = count;
+   this->m_master->m_cache->setRequest(request);
 
    // if(metadata_request)
    // {
@@ -966,6 +971,11 @@ CacheCntlr::doPrefetch(IntPtr eip, IntPtr prefetch_address, SubsecondTime t_star
 HitWhere::where_t
 CacheCntlr::processShmemReqFromPrevCache(IntPtr eip, CacheCntlr* requester, Core::mem_op_t mem_op_type, IntPtr address, bool modeled, bool count,CacheBlockInfo::block_type_t block_type, Prefetch::prefetch_type_t isPrefetch, SubsecondTime t_issue, bool have_write_lock, Core::mem_origin_t mem_origin)
 {
+   Request* request = new Request();
+   request->block_type = block_type;
+   request->count = count;
+   this->m_master->m_cache->setRequest(request);
+
    #ifdef PRIVATE_L2_OPTIMIZATION
    bool have_write_lock_internal = have_write_lock;
    if (! have_write_lock && m_shared_cores > 1)

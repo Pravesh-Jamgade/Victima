@@ -58,7 +58,7 @@ CacheBase::splitAddress(const IntPtr addr, IntPtr& tag, UInt32& set_index, bool 
    IntPtr block_num = linearAddress >> m_log_blocksize;
 
    int shift_amt = Sim()->getExtraConfig()->shift_amt;
-   if(m_name.find("L2") != std::string::npos && shift_amt)
+   if(m_name.find("L2") != std::string::npos && shift_amt && fromTLB)
    {
       block_num = block_num >> shift_amt;
       set_index = block_num & (m_num_sets-1);

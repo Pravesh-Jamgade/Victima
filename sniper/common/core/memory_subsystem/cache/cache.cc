@@ -226,7 +226,16 @@ Cache::getSetLock(IntPtr addr)
    IntPtr tag;
    UInt32 set_index;
 
-   splitAddress(addr, tag, set_index);
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(addr, tag, set_index, 
+      use);
    assert(set_index < m_num_sets);
 
    return m_sets[set_index]->getLock();
@@ -240,11 +249,21 @@ Cache::invalidateSingleLine(IntPtr addr)
    bool result = false;
    bool fake_result = false;
    
-   splitAddress(addr, tag, set_index);
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(addr, tag, set_index,
+      use);
    assert(set_index < m_num_sets);
 
    if(m_name == "L2" && metadata_passthrough_loc > 2){
-      splitAddress(addr, tag, set_index);
+      splitAddress(addr, tag, set_index,
+         use);
       fake_result = m_fake_sets[0]->invalidate(tag);
    }
    
@@ -259,12 +278,19 @@ Cache::accessSingleLine(IntPtr addr, access_t access_type,
 {
    //assert((buff == NULL) == (bytes == 0));
 
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
    // std::cout << "LOG:" << std::hex << addr << ", " << m_name << '\n';
    IntPtr tag;
    UInt32 set_index;
    UInt32 line_index = -1;
    UInt32 block_offset;
-   splitAddress(addr, tag, set_index, block_offset);
+   splitAddress(addr, tag, set_index, block_offset, use);
 
    CacheSet* set = m_sets[set_index];
    CacheBlockInfo* cache_block_info = set->find(tag, &line_index);
@@ -332,7 +358,17 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 {
    IntPtr tag;
    UInt32 set_index;
-   splitAddress(addr, tag, set_index, btype==CacheBlockInfo::TLB_ENTRY || btype==CacheBlockInfo::TLB_ENTRY_PASSTHROUGH);
+
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(addr, tag, set_index, 
+      use);
 
    UInt32 block_offset = addr & ((1<<m_log_blocksize) - 1);
    CacheBlockInfo* cache_block_info = CacheBlockInfo::create(m_cache_type);
@@ -568,11 +604,22 @@ Cache::insertSingleLineTLB(IntPtr addr, Byte* fill_buff,
 
 // Single line cache access at addr
 CacheBlockInfo*
-Cache::peekSingleLine(IntPtr addr, bool fromTLB=false)
+Cache::peekSingleLine(IntPtr addr)
 {
    IntPtr tag;
    UInt32 set_index;
-   splitAddress(addr, tag, set_index, fromTLB);
+   
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(addr, tag, set_index, 
+         use
+         );
 
  //  std::cout << "Peeking single line with address:  " << addr << "and tag" << tag << std::endl;
 
@@ -599,7 +646,16 @@ void Cache::updateSetReplacement(IntPtr addr)
    CacheBlockInfo* cache_block_info;
    CacheSet* set;
 
-   splitAddress(addr, tag, set_index, block_offset);
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(addr, tag, set_index, block_offset,
+      use);
 
    cache_block_info = m_sets[set_index]->find(tag, &line_index);
    
@@ -686,7 +742,16 @@ void Cache::markMetadata(IntPtr address, CacheBlockInfo::block_type_t blocktype)
    IntPtr tag;
    UInt32 set_index;
    
-   splitAddress(address, tag, set_index);
+   bool use = false;
+   if(request != nullptr)
+   {
+      use = request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY || 
+      request->block_type == CacheBlockInfo::block_type_t::TLB_ENTRY_PASSTHROUGH && 
+      m_name.find("L2")!=string::npos;
+   }
+
+   splitAddress(address, tag, set_index,
+      use);
 
    for (int i=0; i < getCacheSet(set_index)->getAssociativity(); i++){
             

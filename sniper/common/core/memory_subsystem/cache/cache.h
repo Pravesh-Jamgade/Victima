@@ -13,6 +13,7 @@
 #include "fault_injection.h"
 #include "stats.h"
 #include <vector>
+#include "request.h"
 
 // Define to enable the set usage histogram
 //#define ENABLE_SET_USAGE_HIST
@@ -90,6 +91,10 @@ class Cache : public CacheBase
 
    public:
 
+      // pravesh
+      Request* request = nullptr;
+      void setRequest(Request* currReq){this->request = currReq;};
+
       std::vector<uint64_t> m_page_walk_cacheblocks; /* timeseries stats */
       std::vector<uint64_t> m_utopia_cacheblocks; /* timeseries stats */
       std::vector<uint64_t> m_security_cacheblocks; /* timeseries stats */
@@ -123,7 +128,7 @@ class Cache : public CacheBase
       void insertSingleLineTLB(IntPtr addr, Byte* fill_buff,
             bool* eviction, IntPtr* evict_addr,
             CacheBlockInfo* evict_block_info, Byte* evict_buff, SubsecondTime now, CacheCntlr *cntlr = NULL,  CacheBlockInfo::block_type_t btype = CacheBlockInfo::block_type_t::NON_PAGE_TABLE, int page_size = 12);
-      CacheBlockInfo* peekSingleLine(IntPtr addr, bool fromTLB=false);
+      CacheBlockInfo* peekSingleLine(IntPtr addr);
       CacheBlockInfo* peekBlock(UInt32 set_index, UInt32 way) const { return m_sets[set_index]->peekBlock(way); }
       void updateSetReplacement(IntPtr addr);
 
