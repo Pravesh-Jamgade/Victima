@@ -7,6 +7,10 @@
 
 #include <decoder.h>
 
+// pravesh
+#include "ExtraConfig.h"
+class ExtraConfig;
+
 class _Thread;
 class SyscallServer;
 class SyncServer;
@@ -79,6 +83,9 @@ public:
    ParametricDramDirectoryMSI::PhysicalMemoryAllocator *getMemoryAllocator() { return m_memory_allocator;}
    ParametricDramDirectoryMSI::Utopia *getUtopia() { return m_utopia;}
 
+   // pravesh
+   ExtraConfig* getExtraConfig(){return m_extra_config;}
+
    bool isRunning() { return m_running; }
    static void enablePerformanceModels();
    static void disablePerformanceModels();
@@ -116,6 +123,7 @@ private:
    ParametricDramDirectoryMSI::PhysicalMemoryAllocator *m_memory_allocator;
    AllocationManager *m_allocation_manager;
    ParametricDramDirectoryMSI::Utopia *m_utopia;
+   ExtraConfig* m_extra_config;
 
    // std::unordered_map<int, UInt32> eviction_cnt; 
    // std::unordered_map<int, bool> megapage_skip_translation; // Global skip translation vector

@@ -167,7 +167,7 @@ void Simulator::start()
    int large_page_percentage = Sim()->getCfg()->getInt("perf_model/alloc_manager/large_page_percentage");
    m_allocation_manager = new AllocationManager(eager,large_page_percentage);
 
-
+   m_extra_config = new ExtraConfig();
 
    if (Sim()->getCfg()->getBool("traceinput/enabled"))
       m_trace_manager = new TraceManager();
