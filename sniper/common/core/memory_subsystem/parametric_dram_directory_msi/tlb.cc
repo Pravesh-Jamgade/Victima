@@ -196,7 +196,9 @@ namespace ParametricDramDirectoryMSI
 
 
           CacheBlockInfo* cb_l1d = l1dcache->peekSingleLine(cache_address);
-          CacheBlockInfo* cb_l2 = l2cache->peekSingleLine(cache_address);
+          // pravesh
+          // peeking from STLB --> L2, hence pass true to ensure shifting of indexing bits
+          CacheBlockInfo* cb_l2 = l2cache->peekSingleLine(cache_address, true);
           CacheBlockInfo* cb_nuca = nuca->peekSingleLine(cache_address);
 
           //std::cout << "Searching in L2 Cache with vpn: " << cache_address << " tag: " << tag <<  " in set: " << set << std::endl;

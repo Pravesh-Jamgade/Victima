@@ -568,11 +568,11 @@ Cache::insertSingleLineTLB(IntPtr addr, Byte* fill_buff,
 
 // Single line cache access at addr
 CacheBlockInfo*
-Cache::peekSingleLine(IntPtr addr)
+Cache::peekSingleLine(IntPtr addr, bool fromTLB=false)
 {
    IntPtr tag;
    UInt32 set_index;
-   splitAddress(addr, tag, set_index);
+   splitAddress(addr, tag, set_index, fromTLB);
 
  //  std::cout << "Peeking single line with address:  " << addr << "and tag" << tag << std::endl;
 

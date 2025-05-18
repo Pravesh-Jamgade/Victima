@@ -123,7 +123,7 @@ class Cache : public CacheBase
       void insertSingleLineTLB(IntPtr addr, Byte* fill_buff,
             bool* eviction, IntPtr* evict_addr,
             CacheBlockInfo* evict_block_info, Byte* evict_buff, SubsecondTime now, CacheCntlr *cntlr = NULL,  CacheBlockInfo::block_type_t btype = CacheBlockInfo::block_type_t::NON_PAGE_TABLE, int page_size = 12);
-      CacheBlockInfo* peekSingleLine(IntPtr addr);
+      CacheBlockInfo* peekSingleLine(IntPtr addr, bool fromTLB=false);
       CacheBlockInfo* peekBlock(UInt32 set_index, UInt32 way) const { return m_sets[set_index]->peekBlock(way); }
       void updateSetReplacement(IntPtr addr);
 
