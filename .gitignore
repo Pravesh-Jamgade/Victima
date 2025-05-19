@@ -1,9 +1,6 @@
-*.o
-*.d
-*.pyc
-
+common/*.o
+common/*.d
+common/*.pyc
 **/*.o
 **/*.d
 **/*.pyc
-lib/**
-*.a
