@@ -1,0 +1,108 @@
+[SNIPER] Warning: Unable to use physical addresses for shared memory simulation.
+[SNIPER] Running ['/media/pravesh/Storage/code/sims/Victima/sniper/record-trace', '-o', '/tmp/tmpDx7zGY/run_benchmarks', '-v', '--roi', '-e', '1', '-s', '0', '-r', '1', '--follow', '--routine-tracing', '--', './fft', '-p', '1']
+[SNIPER] Start here
+True
+[SNIPER] Running ['bash', '-c', '/media/pravesh/Storage/code/sims/Victima/sniper/lib/sniper -c /media/pravesh/Storage/code/sims/Victima/sniper/config/base.cfg --general/total_cores=1 --general/output_dir=/media/pravesh/Storage/code/sims/Victima/sniper/test/fft --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/nehalem.cfg --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/utopia_motivation_baseline.cfg --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/nehalem.cfg --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/utopia_motivation_baseline.cfg --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/virtual_memory_configs/common_translation.cfg --config=/media/pravesh/Storage/code/sims/Victima/sniper/config/virtual_memory_configs/victima.cfg -g --general/magic=true -g --traceinput/stop_with_first_app=true -g --traceinput/restart_apps=false -g --traceinput/stop_with_first_app=false -g --traceinput/enabled=true -g --traceinput/emulate_syscalls=true -g --traceinput/num_apps=1 -g --traceinput/trace_prefix=/tmp/tmpDx7zGY/run_benchmarks']
+<subprocess.Popen object at 0x71bcac3bb910>
+Starting simLet's load config
+config_path
+Allocating Simulator
+Hello from simulator's constructor
+Hello from simulator
+Supporting 2page sizes: 12, 21, POTM Latency: 0
+Creating pwc_L4 cache with 4 sets, 4-way associative, 8B blocksize
+Creating pwc_L3 cache with 4 sets, 4-way associative, 8B blocksize
+Creating pwc_L2 cache with 8 sets, 4-way associative, 8B blocksize
+0
+0
+60
+100
+Registered special metric: ptw_latency_heatmap
+Creating stlb_cache cache with 128 sets, 12-way associative, 4096B blocksize
+Creating itlb_cache cache with 16 sets, 8-way associative, 4096B blocksize
+Creating dtlb_cache cache with 16 sets, 4-way associative, 4096B blocksize
+Registered special metric: L2_TLB_miss_per_page
+Registering cache time series
+Registered special metric: cache_timeseries
+Creating nuca-cache cache with 2048 sets, 11-way associative, 64B blocksize
+Attaching Nuca to PTW
+Core : 0
+Directory type : limited_no_broadcast
+Total Entries : 33554432
+Associativity : 16
+Cache Block Size : 64
+Max hw sharers : 64
+Max Num Sharers : 1
+Initializing cache L 2
+Creating L1-I cache with 64 sets, 8-way associative, 64B blocksize
+Initializing cache L 3
+Creating L1-D cache with 64 sets, 8-way associative, 64B blocksize
+Initializing cache L 4
+Creating L2 cache with 4 sets, 4-way associative, 64B blocksize
+[ExtraConfig] shift_amt, 0
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SIFT_RECORDER] Running /media/pravesh/Storage/code/sims/Victima/sniper/pin_kit/pin -mt -injection child -xyzzy -ifeellucky -follow_execv -t /media/pravesh/Storage/code/sims/Victima/sniper/sift/recorder/obj-intel64/sift_recorder -verbose 1 -debug 0 -roi 1 -roi-mpi 0 -f 0 -d 0 -b 0 -o /tmp/tmpDx7zGY/run_benchmarks -e 1 -s 0 -r 1 -pa 0 -rtntrace 1 -stop 0 -- ./fft -p 1
+Opening output for thread: 0
+[SIFT_RECORDER:0:0] Output = [/tmp/tmpDx7zGY/run_benchmarks.app0.th0.sift]
+[SIFT_RECORDER:0:0] Response = [/tmp/tmpDx7zGY/run_benchmarks_response.app0.th0.sift]
+[SNIPER] Enabling performance models
+[SNIPER] Setting instrumentation mode to DETAILED
+[SIFT_RECORDER:0] ROI Begin
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 3.65 seconds
+[SNIPER] Simulated 1.2M instructions, 3.5M cycles, 0.33 IPC
+[SNIPER] Simulation speed 314.8 KIPS (314.8 KIPS / target core - 3176.6ns/instr)
+[SNIPER] Sampling: executed 68.10% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[TRACE:0] -- DONE --
+[SIFT_RECORDER:0] ROI End
+
+FFT with Blocking Transpose
+1024 Complex Doubles
+1 Processors
+65536 Cache lines
+16 Byte line size
+4096 Bytes per page
+
+
+PROCESS STATISTICS
+Computation Transpose Transpose
+Proc Time Time Fraction
+0 867 78 0.08997
+
+TIMING INFORMATION
+Start time : -1844408318
+Initialization finish time : -1844407842
+Overall finish time : -1844406975
+Total time with initialization : 1343
+Total time without initialization : 867
+Overall transpose time : 78
+Overall transpose fraction : 0.08997
+
+[SIFT_RECORDER:0:0] Recorded 1133112 (out of 1269933) instructions
+Logging PTW latency heatmap
+Logging L2 TLB miss per page
+Logging Nuca ptw data
+Logging Nuca ptw data security
+Logging Nuca ptw data expressive
+Logging Nuca tlb entries
+Logging l1_dcache data
+Logging l1d_cache tlb entries
+Logging l2_cache data
+Logging l2_cache tlb entries
+Logging l1_dcache data security
+Logging l2_cache data security
+Logging l1_dcache data expressive
+Logging l2_cache data expressive
+691096 0
+inside nested try
+inside try
+0
+[SNIPER] End
+[SNIPER] Elapsed time: 6.17 seconds
